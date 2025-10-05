@@ -52,14 +52,14 @@
     </main>
 
     <div class="calculation-icon">
-        <a href="/calculation/{{.calculationID}}" class="calculation-link">
+        <a href="/insulin_calculation/{{.insulinCalculationID}}" class="calculation-link">
             <svg width="44" height="47" viewBox="0 0 44 47" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 12H40V41H4V12Z" fill="#08C3DC"/>
                 <path d="M4 12H40V17H4V12Z" fill="#08C3DC"/>
                 <path d="M12 6H32V12H12V6Z" fill="#08C3DC"/>
             </svg>
-            {{if gt .count 0}}
-            <span class="calculation-count">{{.count}}</span>
+            {{if gt .patients_count 0}}
+            <span class="calculation-count">{{.patients_count}}</span>
             {{end}}
         </a>
     </div>
