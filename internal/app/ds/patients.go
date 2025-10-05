@@ -1,7 +1,7 @@
 package ds
 
 type Patient struct {
-	ID          int     `gorm:"primaryKey"`
+	Patient_ID  uint    `gorm:"primaryKey"`
 	Name        string  `gorm:"type:varchar(100);not null"`
 	Sensitivity float32 `gorm:"type:decimal(3,2);not null;check:sensitivity > 0"`
 	Type        int     `gorm:"type:integer;not null;check:type IN (1,2,3)"`
@@ -10,3 +10,4 @@ type Patient struct {
 	Status      string  `gorm:"type:varchar(20);not null;default:'действует';check:status IN ('удален', 'действует')"`
 	PhotoURL    string  `gorm:"type:varchar(500)"`
 }
+
