@@ -25,8 +25,9 @@ func StartServer() {
 
 	r.GET("/", handler.GetPatients)
 	r.GET("/patient/:id", handler.GetPatient)
-	r.GET("/calculation/:id", handler.GetCalculation)
+	r.GET("/insulin_calculation/:id", handler.GetInsulinCalculation)
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run()
 	log.Println("Server down")
 }
+
