@@ -19,14 +19,14 @@ func main() {
 		panic("failed to connect database")
 	}
 
-	// Migrate the schema
 	err = db.AutoMigrate(
 		&ds.Patient{},
-		&ds.Calculation{},
-		&ds.CalculationPatient{},
+		&ds.InsulinCalculation{},
+		&ds.InsulinCalculationPatients{},
 		&ds.User{},
 	)
 	if err != nil {
 		panic("cant migrate db")
 	}
 }
+
