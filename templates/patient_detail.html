@@ -24,21 +24,12 @@
     </header>
 
     <main class="main-patient-content">
-        <!-- Заголовок информации -->
         <div class="patient-info-title">Информация о пациенте:</div>
-
-        <!-- Контейнер для фото и информации -->
         <div class="patient-content-container">
-            <!-- Контейнер для фото и имени -->
             <div class="patient-photo-name-container">
-                <!-- Фото пациента -->
-                <div class="patient-photo" style="background-image: url('http://localhost:9000/test/{{.patient.ID}}.jpg');"></div>
-                
-                <!-- Имя пациента под фото -->
+                <div class="patient-photo" style="background-image: url('http://localhost:9000/test/{{.patient.Patient_ID}}.jpg');"></div>
                 <h2 class="patient-name-large">{{.patient.Name}}</h2>
             </div>
-
-            <!-- Белый прямоугольник с информацией -->
             <div class="patient-info-card">
                 <div class="patient-info">
                     Диабет {{.patient.Type}} типа<br>
