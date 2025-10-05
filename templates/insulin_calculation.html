@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расчет пациентов</title>
-    <link rel="stylesheet" href="/static/styles/calculation_style.css">
+    <link rel="stylesheet" href="/static/styles/insulin_calculation_style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cantarell:wght@400;700&family=Candal&family=Segoe+UI:wght@400;700;900&family=Roboto:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -25,8 +25,8 @@
 
     <main class="main-patients-content">
         <div class="calculation-actions">
-            <form method="POST" action="/calculation/delete">
-                <input type="hidden" name="calculation_id" value="{{.calculationID}}">
+            <form method="POST" action="/insulin_calculation/delete">
+                <input type="hidden" name="insulin_calculation_id" value="{{.insulin_calculation_ID}}">
                 <button type="submit" class="delete-calculation-btn" 
                         onclick="return confirm('Вы уверены, что хотите удалить этот расчет?')">
                     🗑️ Удалить расчет
@@ -45,7 +45,7 @@
             {{range .patients}}
             <div class="patient-row">
                 <div class="patient-info">
-                    <div class="patient-photo" style="background-image: url('http://localhost:9000/test/{{.Patient.ID}}.jpg');"></div>
+                    <div class="patient-photo" style="background-image: url('http://localhost:9000/test/{{.Patient.Patient_ID}}.jpg');"></div>
                     <div class="patient-name">{{.Patient.Name}}</div>
                 </div>
                 <div class="sensitivity-value">{{.Patient.Sensitivity}}</div>
