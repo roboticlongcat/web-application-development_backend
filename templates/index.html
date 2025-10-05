@@ -41,14 +41,14 @@
             {{range .patients}}
             <div class="patient-card">
                 <div class="patient-image-container">
-                    <img src="http://localhost:9000/test/{{.ID}}.jpg" alt="{{.Name}}" class="patient-image">
+                    <img src="http://localhost:9000/test/{{.Patient_ID}}.jpg" alt="{{.Name}}" class="patient-image">
                 </div>
-                <h3 class="patient-name"> <a href="/patient/{{.ID}}">{{.Name}}</a></h3>
+                <h3 class="patient-name"> <a href="/patient/{{.Patient_ID}}">{{.Name}}</a></h3>
                 <p class="sensitivity-label">Коэффициент чувствительности:</p>
                 <p class="sensitivity-value">{{.Sensitivity}}</p>
                 <div class="patient-actions">
-                    <form method="POST" action="/calculation/add">
-                        <input type="hidden" name="patient_id" value="{{.ID}}">
+                    <form method="POST" action="/insulin_calculation/add">
+                        <input type="hidden" name="patient_id" value="{{.Patient_ID}}">
                         <button type="submit" class="add-button">Добавить в расчет</button>
                     </form>
                 </div>
@@ -56,18 +56,27 @@
             {{end}}
         </div>
     </main>
-
     <div class="calculation-icon">
-        <a href="/calculation/{{.calculationID}}" class="calculation-link">
-            <svg width="44" height="47" viewBox="0 0 44 47" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 12H40V41H4V12Z" fill="#08C3DC"/>
-                <path d="M4 12H40V17H4V12Z" fill="#08C3DC"/>
-                <path d="M12 6H32V12H12V6Z" fill="#08C3DC"/>
-            </svg>
-            {{if gt .count 0}}
-                <span class="calculation-count">{{.count}}</span>
-            {{end}}
-        </a>
+    <div class="calculation-icon">
+    {{if .hasActiveInsulinCalculation}}
+    <a href="/insulin_calculation/{{.insulin_calculation_ID}}" class="calculation-link" style="cursor: pointer;">
+    {{else}}
+    <div class="calculation-link disabled" style="cursor: not-allowed; opacity: 0.5;">
+    {{end}}
+        <svg width="44" height="47" viewBox="0 0 44 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12H40V41H4V12Z" fill="{{if .hasActiveInsulinCalculation}}#08C3DC{{else}}#CCCCCC{{end}}"/>
+            <path d="M4 12H40V17H4V12Z" fill="{{if .hasActiveInsulinCalculation}}#08C3DC{{else}}#CCCCCC{{end}}"/>
+            <path d="M12 6H32V12H12V6Z" fill="{{if .hasActiveInsulinCalculation}}#08C3DC{{else}}#CCCCCC{{end}}"/>
+        </svg>
+        {{if gt .count 0}}
+            <span class="calculation-count">{{.count}}</span>
+        {{end}}
+    {{if .hasActiveInsulinCalculation}}
+    </a>
+    {{else}}
     </div>
+    {{end}}
+</div>
+</div>
 </body>
 </html>
