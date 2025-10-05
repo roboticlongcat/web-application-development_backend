@@ -1,128 +1,96 @@
-package repository
+package handler
 
 import (
-	"fmt"
-	"strings"
+	"net/http"
+	"sample/internal/app/repository"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
-type Repository struct {
+type Handler struct {
+	Repository *repository.Repository
 }
 
-func NewRepository() (*Repository, error) {
-	return &Repository{}, nil
-}
-
-type Patient struct {
-	ID          int
-	Name        string
-	Sensitivity float32
-	Type        int
-	Glucose     float32
-}
-
-func (r *Repository) GetPatients() ([]Patient, error) {
-	patients := []Patient{
-		{
-			ID:          1,
-			Name:        "Нефедова Екатерина",
-			Sensitivity: 1.5,
-			Type:        2,
-			Glucose:     7,
-		},
-		{
-			ID:          2,
-			Name:        "Пушкина Светлана",
-			Sensitivity: 2.75,
-			Type:        1,
-			Glucose:     10,
-		},
-		{
-			ID:          3,
-			Name:        "Четкин Вячеслав",
-			Sensitivity: 0.5,
-			Type:        3,
-			Glucose:     3.9,
-		},
-		{
-			ID:          4,
-			Name:        "Быстров Дмитрий",
-			Sensitivity: 1.2,
-			Type:        2,
-			Glucose:     5,
-		},
-		{
-			ID:          5,
-			Name:        "Забелина Майя",
-			Sensitivity: 3.0,
-			Type:        1,
-			Glucose:     12,
-		},
+func NewHandler(r *repository.Repository) *Handler {
+	return &Handler{
+		Repository: r,
 	}
-
-	if len(patients) == 0 {
-		return nil, fmt.Errorf("массив пустой")
-	}
-
-	return patients, nil
 }
 
-func (r *Repository) GetPatient(id int) (Patient, error) {
+func (h *Handler) GetPatients(ctx *gin.Context) {
+	var patients []repository.Patient
+	var err error
 
-	patients, err := r.GetPatients()
-	if err != nil {
-		return Patient{}, err
-	}
-
-	for _, patient := range patients {
-		if patient.ID == id {
-			return patient, nil
+	patientSearchQuery := ctx.Query("query")
+	if patientSearchQuery == "" {
+		patients, err = h.Repository.GetPatients()
+		if err != nil {
+			logrus.Error(err)
 		}
-	}
-	return Patient{}, fmt.Errorf("пациент не найден")
-}
-
-func (r *Repository) GetPatientsByName(name string) ([]Patient, error) {
-	patients, err := r.GetPatients()
-	if err != nil {
-		return []Patient{}, err
-	}
-
-	var result []Patient
-	for _, patient := range patients {
-		if strings.Contains(strings.ToLower(patient.Name), strings.ToLower(name)) {
-			result = append(result, patient)
+	} else {
+		patients, err = h.Repository.GetPatientsByName(patientSearchQuery)
+		if err != nil {
+			logrus.Error(err)
 		}
 	}
 
-	return result, nil
+	patients_count, _ := h.Repository.GetInsulinCalculationItemsCount(1)
+
+	ctx.HTML(http.StatusOK, "index.html", gin.H{
+		"patients":             patients,
+		"query":                patientSearchQuery,
+		"patients_count":       patients_count,
+		"insulinCalculationID": 1,
+	})
 }
 
-func (r *Repository) GetCalculation(calculationID int) ([]Patient, error) {
-	allPatients, err := r.GetPatients()
+func (h *Handler) GetPatient(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return nil, err
+		logrus.Error(err)
 	}
 
-	calculation := []Patient{}
+	patient, err := h.Repository.GetPatient(id)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	for _, patient := range allPatients {
-		if patient.ID == 5 || patient.ID == 1 {
-			calculation = append(calculation, patient)
+	ctx.HTML(http.StatusOK, "patient_detail.html", gin.H{
+		"patient": patient,
+	})
+}
+
+func (h *Handler) GetInsulinCalculation(ctx *gin.Context) {
+	IDStr := ctx.Param("id")
+	calculationID, err := strconv.Atoi(IDStr)
+
+	if err != nil {
+		logrus.Error("Неверный ID расчета инсулина:", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Неверный ID расчета инсулина"})
+		return
+	}
+
+	insulinCalculation, err := h.Repository.GetInsulinCalculation(calculationID)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	var patients []repository.Patient
+	var IDPatients [5]int = [5]int{1, 5}
+
+	for _, IDpatient := range insulinCalculation.Items {
+		for _, number := range IDPatients {
+			if number == IDpatient.PatientID {
+				patient, _ := h.Repository.GetPatient(number)
+				patients = append(patients, patient)
+			}
 		}
 	}
 
-	if len(calculation) == 0 {
-		return nil, fmt.Errorf("расчет пуст")
-	}
-
-	return calculation, nil
-}
-
-func (r *Repository) GetCalculationItemsCount(calculationID int) (int, error) {
-	calculation, err := r.GetCalculation(calculationID)
-	if err != nil {
-		return 0, err
-	}
-
-	return len(calculation), nil
+	ctx.HTML(http.StatusOK, "insulin_calculation.html", gin.H{
+		"patients": patients,
+	})
 }
