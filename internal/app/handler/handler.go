@@ -36,7 +36,7 @@ func (h *Handler) GetPatients(ctx *gin.Context) {
 		}
 	}
 
-	patients_count, _ := h.Repository.GetCalculationItemsCount(1)
+	patients_count, _ := h.Repository.GetInsulinCalculationItemsCount(1)
 
 	ctx.HTML(http.StatusOK, "index.html", gin.H{
 		"patients":             patients,
