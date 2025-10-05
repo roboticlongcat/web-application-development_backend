@@ -26,9 +26,9 @@ func (r *Repository) GetPatients() ([]ds.Patient, error) {
 	return patients, nil
 }
 
-func (r *Repository) GetPatient(id int) (ds.Patient, error) {
+func (r *Repository) GetPatient(id uint) (ds.Patient, error) {
 	patient := ds.Patient{}
-	err := r.db.Where("id = ?", id).Find(&patient).Error
+	err := r.db.Where("patient_id = ?", id).Find(&patient).Error
 
 	if err != nil {
 		return ds.Patient{}, err
@@ -46,20 +46,18 @@ func (r *Repository) GetPatientsByName(name string) ([]ds.Patient, error) {
 	return patients, nil
 }
 
-func (r *Repository) GetCalculation(id int) ([]ds.CalculationPatient, error) {
-	var calculationPatients []ds.CalculationPatient
-
-	// Сначала получаем связи
-	err := r.db.Where("calculation_id = ?", id).Preload("Patient").Find(&calculationPatients).Error
+func (r *Repository) GetInsulinCalculation(id uint) ([]ds.InsulinCalculationPatients, error) {
+	var insulincalculationPatients []ds.InsulinCalculationPatients
+	err := r.db.Where("insulin_calculation_id = ?", id).Preload("Patient").Find(&insulincalculationPatients).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return calculationPatients, nil
+	return insulincalculationPatients, nil
 }
 
-func (r *Repository) GetCalculationItemsCount(calculationID int) (int, error) {
-	calculation, err := r.GetCalculation(calculationID)
+func (r *Repository) GetInsulinCalculationItemsCount(insulincalculationID uint) (int, error) {
+	calculation, err := r.GetInsulinCalculation(insulincalculationID)
 	if err != nil {
 		return 0, err
 	}
@@ -67,17 +65,17 @@ func (r *Repository) GetCalculationItemsCount(calculationID int) (int, error) {
 	return len(calculation), nil
 }
 
-func (r *Repository) GetCalculationCount() int64 {
-	var calculationID uint
+func (r *Repository) GetInsulinCalculationCount() int64 {
+	var insulincalculationID uint
 	var count int64
 	creatorID := 1
 
-	err := r.db.Model(&ds.Calculation{}).Where("creator_id = ? AND status = ?", creatorID, "черновик").Select("id").First(&calculationID).Error
+	err := r.db.Model(&ds.InsulinCalculation{}).Where("creator_id = ? AND status = ?", creatorID, "черновик").Select("insulin_calculation_id").First(&insulincalculationID).Error
 	if err != nil {
 		return 0
 	}
 
-	err = r.db.Model(&ds.CalculationPatient{}).Where("calculation_id = ?", calculationID).Count(&count).Error
+	err = r.db.Model(&ds.InsulinCalculationPatients{}).Where("insulin_calculation_id = ?", insulincalculationID).Count(&count).Error
 	if err != nil {
 		logrus.Println("Error counting records in lists_chats:", err)
 	}
@@ -85,95 +83,101 @@ func (r *Repository) GetCalculationCount() int64 {
 	return count
 }
 
-func (r *Repository) DeleteCalculation(calculationID uint) error {
-	err := r.db.Model(&ds.Calculation{}).Where("id = ?", calculationID).UpdateColumn("status", "удалён").Error
-	fmt.Println(calculationID)
+func (r *Repository) DeleteInsulinCalculation(insulincalculationID uint) error {
+	err := r.db.Model(&ds.InsulinCalculation{}).Where("insulin_calculation_id = ?", insulincalculationID).UpdateColumn("status", "удален").Error
+	fmt.Println(insulincalculationID)
 	if err != nil {
-		return fmt.Errorf("ошибка при удалении расчета с id %d: %w", calculationID, err)
+		return fmt.Errorf("ошибка при удалении расчета с id %d: %w", insulincalculationID, err)
 	}
 
 	return nil
 }
 
-func (r *Repository) GetActiveCalculationID() uint {
-	var calculationID uint
+func (r *Repository) GetActiveInsulinCalculationID() uint {
+	var insulincalculationID uint
 	creatorID := 1
 
-	err := r.db.Model(&ds.Calculation{}).
+	err := r.db.Model(&ds.InsulinCalculation{}).
 		Where("creator_id = ? AND status = ?", creatorID, "черновик").
-		Select("id").First(&calculationID).Error
+		Select("insulin_calculation_id").First(&insulincalculationID).Error
 
 	if err != nil {
 		return 0
 	}
-	return calculationID
+	return insulincalculationID
 }
 
-func (r *Repository) AddPatientToCalculation(patientID uint, creatorID uint, currentGlucose, breadUnits float32) error {
-	var calculation ds.Calculation
+func (r *Repository) AddPatientToInsulinCalculation(patientID uint, creatorID uint, currentGlucose, breadUnits float32) error {
+	var insulincalculation ds.InsulinCalculation
 
-	// Ищем активную заявку пользователя
 	err := r.db.Where("creator_id = ? AND status = ?", creatorID, "черновик").
-		First(&calculation).Error
+		First(&insulincalculation).Error
 
-	// Если заявки нет - создаем новую
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		calculation = ds.Calculation{
-			Status:      "черновик",
-			CreatedAt:   time.Now(),
-			CreatorID:   int(creatorID),
-			ModeratorID: nil, // Пока нет модератора
+		var maxID uint
+		r.db.Model(&ds.InsulinCalculation{}).Select("COALESCE(MAX(insulin_calculation_id), 0)").Scan(&maxID)
+
+		insulincalculation = ds.InsulinCalculation{
+			Insulin_Calculation_ID: maxID + 1, // Явно указываем следующий ID
+			Status:                 "черновик",
+			CreatedAt:              time.Now(),
+			CreatorID:              creatorID,
+			ModeratorID:            2,
 		}
-		if err := r.db.Create(&calculation).Error; err != nil {
+		if err := r.db.Create(&insulincalculation).Error; err != nil {
 			return err
 		}
 	} else if err != nil {
 		return err
 	}
 
-	// Проверяем, нет ли уже этого пациента в заявке
 	var count int64
-	r.db.Model(&ds.CalculationPatient{}).
-		Where("calculation_id = ? AND patient_id = ?", calculation.ID, patientID).
+	r.db.Model(&ds.InsulinCalculationPatients{}).
+		Where("insulin_calculation_id = ? AND patient_id = ?", insulincalculation.Insulin_Calculation_ID, patientID).
 		Count(&count)
 
-	if count == 0 {
-		// Получаем данные пациента для расчета
-		var patient ds.Patient
-		if err := r.db.First(&patient, patientID).Error; err != nil {
-			return err
+	if count > 0 {
+		err = r.db.Model(&ds.InsulinCalculationPatients{}).
+			Where("insulin_calculation_id = ? AND patient_id = ?", insulincalculation.Insulin_Calculation_ID, patientID).
+			Updates(map[string]interface{}{
+				"current_glucose":    currentGlucose,
+				"bread_units":        breadUnits,
+				"calculated_insulin": r.СalculateInsulin(currentGlucose, breadUnits, patientID),
+			}).Error
+	} else {
+		calculationPatient := ds.InsulinCalculationPatients{
+			Insulin_Calculation_ID: insulincalculation.Insulin_Calculation_ID,
+			Patient_ID:             patientID,
+			CurrentGlucose:         currentGlucose,
+			BreadUnits:             breadUnits,
+			CalculatedInsulin:      r.СalculateInsulin(currentGlucose, breadUnits, patientID),
 		}
-
-		// Рассчитываем инсулин по формуле
-
-		calculatedInsulin := (currentGlucose - patient.Glucose) / patient.Sensitivity
-
-		calculationPatient := ds.CalculationPatient{
-			CalculationID:     calculation.ID,
-			PatientID:         int(patientID),
-			CurrentGlucose:    currentGlucose,
-			BreadUnits:        breadUnits,
-			CalculatedInsulin: calculatedInsulin,
-		}
-
-		if err := r.db.Create(&calculationPatient).Error; err != nil {
-			return err
-		}
+		err = r.db.Create(&calculationPatient).Error
 	}
 
-	return nil
+	return err
 }
 
-func (r *Repository) IsDraftCalculation(calculationID int) (bool, error) {
-	var calculation ds.Calculation
-	err := r.db.Select("status").Where("id = ?", calculationID).First(&calculation).Error
+func (r *Repository) IsDraftInsulinCalculation(insulincalculationID uint) (bool, error) {
+	var insulincalculation ds.InsulinCalculation
+	err := r.db.Select("status").Where("insulin_calculation_id = ?", insulincalculationID).First(&insulincalculation).Error
 	if err != nil {
 		return false, err
 	}
-	return calculation.Status == "черновик", nil
+	return insulincalculation.Status == "черновик", nil
 }
 
-func (r *Repository) HasActiveCalculation() bool {
-	calculationID := r.GetActiveCalculationID()
-	return calculationID != 0
+func (r *Repository) HasActiveInsulinCalculation() bool {
+	insulincalculationID := r.GetActiveInsulinCalculationID()
+	return insulincalculationID != 0
+}
+
+func (r *Repository) СalculateInsulin(currentGlucose, breadUnits float32, patientID uint) float32 {
+	var patient ds.Patient
+	if err := r.db.First(&patient, patientID).Error; err != nil {
+		return 0
+	}
+	insulin := breadUnits * patient.Sensitivity
+
+	return insulin
 }
