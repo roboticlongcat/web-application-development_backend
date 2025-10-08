@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"math"
 
 	"errors"
 	"time"
@@ -48,7 +49,7 @@ func (r *Repository) GetPatientsByName(name string) ([]ds.Patient, error) {
 
 func (r *Repository) GetInsulinCalculation(id uint) ([]ds.InsulinCalculationPatients, error) {
 	var insulincalculationPatients []ds.InsulinCalculationPatients
-	err := r.db.Where("insulin_calculation_id = ?", id).Preload("Patient").Find(&insulincalculationPatients).Error
+	err := r.db.Where("insulin_calculation_id = ?", id).Preload("Patient").Preload("InsulinCalculation").Find(&insulincalculationPatients).Error
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (r *Repository) AddPatientToInsulinCalculation(patientID uint, creatorID ui
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		var maxID uint
-		r.db.Model(&ds.InsulinCalculation{}).Select("COALESCE(MAX(insulin_calculation_id), 0)").Scan(&maxID)
+		r.db.Model(&ds.InsulinCalculation{}).Select("COALESCE(MAX(insulin_calculation_id))").Scan(&maxID)
 
 		insulincalculation = ds.InsulinCalculation{
 			Insulin_Calculation_ID: maxID + 1, // Явно указываем следующий ID
@@ -142,15 +143,18 @@ func (r *Repository) AddPatientToInsulinCalculation(patientID uint, creatorID ui
 			Updates(map[string]interface{}{
 				"current_glucose":    currentGlucose,
 				"bread_units":        breadUnits,
-				"calculated_insulin": r.СalculateInsulin(currentGlucose, breadUnits, patientID),
+				"calculated_insulin": 0,
 			}).Error
 	} else {
+		var maxID uint
+		r.db.Model(&ds.InsulinCalculationPatients{}).Select("COALESCE(MAX(insulin_calculation_patient_id))").Scan(&maxID)
 		calculationPatient := ds.InsulinCalculationPatients{
-			Insulin_Calculation_ID: insulincalculation.Insulin_Calculation_ID,
-			Patient_ID:             patientID,
-			CurrentGlucose:         currentGlucose,
-			BreadUnits:             breadUnits,
-			CalculatedInsulin:      r.СalculateInsulin(currentGlucose, breadUnits, patientID),
+			Insulin_Calculation_Patient_ID: maxID + 1,
+			Insulin_Calculation_ID:         insulincalculation.Insulin_Calculation_ID,
+			Patient_ID:                     patientID,
+			CurrentGlucose:                 currentGlucose,
+			BreadUnits:                     breadUnits,
+			CalculatedInsulin:              0,
 		}
 		err = r.db.Create(&calculationPatient).Error
 	}
@@ -172,12 +176,30 @@ func (r *Repository) HasActiveInsulinCalculation() bool {
 	return insulincalculationID != 0
 }
 
-func (r *Repository) СalculateInsulin(currentGlucose, breadUnits float32, patientID uint) float32 {
+// формула расчета инсулина
+func (r *Repository) CalculateInsulin(currentGlucose, breadUnits float32, patientID uint) float32 {
 	var patient ds.Patient
 	if err := r.db.First(&patient, patientID).Error; err != nil {
 		return 0
 	}
-	insulin := breadUnits * patient.Sensitivity
 
-	return insulin
+	SDI := float32(100) / patient.Sensitivity
+	correctionInsulin := (currentGlucose - patient.Glucose) / patient.Sensitivity
+	insulinCarbRatio := float32(500.0) / SDI
+	foodInsulin := insulinCarbRatio * breadUnits
+	totalInsulin := correctionInsulin + foodInsulin
+
+	if totalInsulin < 0 {
+		totalInsulin = 0
+	}
+
+	totalInsulin = float32(math.Round(float64(totalInsulin)*100) / 100)
+
+	// Логирование для отладки
+	logrus.Printf(
+		"Расчет инсулина: patientID=%d, СДИ=%.2f, КЧ=%.2f, коррекция=%.2f, инс/угл=%.2f, еда=%.2f, итого=%.2f",
+		patientID, SDI, patient.Sensitivity, correctionInsulin, insulinCarbRatio, foodInsulin, totalInsulin,
+	)
+
+	return totalInsulin
 }
