@@ -21,8 +21,9 @@ type Patient struct {
 }
 
 type InsulinCalculation struct {
-	ID    int
-	Items []PatientsInsulinCalculation
+	ID      int
+	Comment string
+	Items   []PatientsInsulinCalculation
 }
 
 type PatientsInsulinCalculation struct {
@@ -111,7 +112,8 @@ func (r *Repository) GetPatientsByName(name string) ([]Patient, error) {
 
 func (r *Repository) GetInsulinCalculation(insulinCalculationID int) (InsulinCalculation, error) {
 	insulinCalculation := InsulinCalculation{
-		ID: insulinCalculationID,
+		ID:      insulinCalculationID,
+		Comment: "как можно скорее!!",
 		Items: []PatientsInsulinCalculation{
 			{PatientID: 5, CurrentGlucose: 12, BreadUnits: 5, CalculatedInsulin: 6},
 			{PatientID: 1, CurrentGlucose: 10, BreadUnits: 10, CalculatedInsulin: 5},
