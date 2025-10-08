@@ -91,6 +91,7 @@ func (h *Handler) GetInsulinCalculation(ctx *gin.Context) {
 	}
 
 	ctx.HTML(http.StatusOK, "insulin_calculation.html", gin.H{
-		"patients": patients,
+		"patients":           patients,
+		"insulinCalculation": insulinCalculation,
 	})
 }
