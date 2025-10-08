@@ -56,17 +56,81 @@ body {
     margin: 0 auto;
     width: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
 .patients-cart-table {
     width: 800px;
-    height: 350px;
     background: #FFFBFB;
-    position: relative;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     padding: 20px;
+}
+
+/* Стили для блока комментария внутри таблицы */
+.calculation-comment-section {
+    width: 100%;
+    background: #FFFBFB;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #888888;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.comment-label {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 21px;
+    color: #000000;
+}
+
+.comment-urgency {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 19px;
+    color: #FF4444;
+}
+
+.comment-content {
+    width: 100%;
+}
+
+.comment-input {
+    width: 400px; /* Ширина 100px */
+    height: 60px; /* Высота 60px */
+    padding: 10px 12px;
+    border: 1px solid #CAC4D0;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: #49454F;
+    background: white;
+    outline: none;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+    resize: none; /* Запрещаем изменение размера */
+}
+
+.comment-input:focus {
+    border-color: #08C3DC;
+    background: #F8FDFF;
+}
+
+.comment-input::placeholder {
+    color: #CAC4D0;
 }
 
 .patients-table-header {
@@ -74,7 +138,6 @@ body {
     grid-template-columns: 200px 120px 120px 120px 120px;
     gap: 20px;
     align-items: center;
-    margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #888888;
 }
@@ -215,14 +278,15 @@ body {
 }
 
 .measure-input-field[type="number"]::-webkit-outer-spin-button,
-.meausre-input-field[type="number"]::-webkit-inner-spin-button {
+.measure-input-field[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
 /* Стили для действий с расчетом */
 .calculation-actions {
-    padding: 20px;
+    width: 800px;
+    padding: 0 0 20px 0;
     text-align: right;
 }
 
