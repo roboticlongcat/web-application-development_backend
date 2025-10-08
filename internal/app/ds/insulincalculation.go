@@ -12,7 +12,9 @@ type InsulinCalculation struct {
 	CalculatedAt           *time.Time `gorm:"type:timestamp"`
 	CompletedAt            *time.Time `gorm:"type:timestamp"`
 	ModeratorID            uint       `gorm:"type:integer"`
+	Comment                string     `gorm:"type:varchar(100)"`
 
 	Creator   User `gorm:"foreignKey:CreatorID"`
 	Moderator User `gorm:"foreignKey:ModeratorID"`
 }
+
