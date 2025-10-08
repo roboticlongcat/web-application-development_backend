@@ -33,7 +33,18 @@
                 </button>
             </form>
         </div>
+
         <div class="patients-cart-table">
+            <!-- Блок комментария к расчету - внутри таблицы над пациентами -->
+            <div class="calculation-comment-section">
+                <div class="comment-header">
+                    <span class="comment-label">Комментарий к расчету:</span>
+                </div>
+                <div class="comment-content">
+                    <input type="text" class="comment-input" placeholder="Добавьте комментарий к расчету..." value="{{.InsulinCalculation.Comment}}">
+                </div>
+            </div>
+
             <div class="patients-table-header">
                 <div class="patient-info-column-title">Пациент</div>
                 <div class="patient-info-column-title sensitivity-title">коэффициент чувствительности</div>
@@ -56,7 +67,7 @@
                     <input type="number" class="measure-input-field" placeholder="0" min="0" step="0.1" value="12">
                 </div>
                 <div class="measure-input-chip">
-                    <input type="number" class="measure-input-field" placeholder="0" min="0" step="0.1" value="6">
+                    <input type="number" class="measure-input-field" placeholder="0" min="0" step="0.1" value="0" disabled>
                 </div>
             </div>
             {{end}}
