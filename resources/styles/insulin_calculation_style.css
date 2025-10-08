@@ -1,0 +1,241 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #E7E7E7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cardio-header {
+    width: 100%;
+    height: 54px;
+    background: #08C3DC;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.cardio-header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.cardio-icon {
+    display: flex;
+    align-items: center;
+}
+
+.cardio-header-title {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 27px;
+    color: #FFFFFF;
+    margin: 0;
+}
+
+.main-patients-content {
+    flex: 1;
+    padding: 80px 20px 50px;
+    max-width: 850px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.patients-cart-table {
+    width: 800px;
+    height: 500px;
+    background: #FFFBFB;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.patients-table-header {
+    display: grid;
+    grid-template-columns: 200px 120px 120px 120px 120px;
+    gap: 20px;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #888888;
+}
+
+.patient-info-column-title {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 19px;
+    text-align: center;
+    color: #000000;
+    word-wrap: break-word;
+}
+
+.patient-row {
+    display: grid;
+    grid-template-columns: 200px 120px 120px 120px 120px;
+    gap: 20px;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #888888;
+}
+
+.patient-row:last-child {
+    border-bottom: none;
+}
+
+.patient-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.patient-photo {
+    width: 60px;
+    height: 80px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f0f0f0;
+    border-radius: 0px;
+    flex-shrink: 0;
+}
+
+.patient-name {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 19px;
+    color: #000000;
+    text-align: left;
+    min-width: 100px;
+}
+
+.sensitivity-value {
+    font-family: 'Candal';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 21px;
+    text-align: center;
+    color: #F2813F;
+}
+
+.measure-input-chip {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #CAC4D0;
+    border-radius: 8px;
+    width: 60px;
+    height: 32px;
+    background: white;
+    margin: 0 auto;
+}
+
+.measure-input-chip-text {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    letter-spacing: 0.1px;
+    color: #49454F;
+}
+
+.sensitivity-title {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.glucose-title {
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.measure-input-chip {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #CAC4D0;
+    border-radius: 8px;
+    width: 80px;
+    height: 32px;
+    background: white;
+    margin: 0 auto;
+}
+
+.measure-input-field {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    letter-spacing: 0.1px;
+    color: #49454F;
+    padding: 0 10px;
+    border-radius: 8px;
+}
+
+.measure-input-field:focus {
+    border: 1px solid #08C3DC;
+    background: #F8FDFF;
+}
+
+.measure-input-field::placeholder {
+    color: #CAC4D0;
+}
+
+.measure-input-field[type="number"]::-webkit-outer-spin-button,
+.meausre-input-field[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Стили для действий с расчетом */
+.calculation-actions {
+    padding: 20px;
+    text-align: right;
+}
+
+.delete-calculation-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.delete-calculation-btn:hover {
+    background: #cc0000;
+}

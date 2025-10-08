@@ -1,0 +1,133 @@
+/* Общие стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #E7E7E7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-patient-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 100px 20px 50px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.patient-info-title {
+    font-family: 'Cantarell';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 28px;
+    color: #000000;
+    margin-bottom: 50px;
+    width: 100%;
+    text-align: center;
+}
+
+.patient-content-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.patient-photo-name-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.patient-photo {
+    width: 277px;
+    height: 344px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f0f0f0;
+    border-radius: 0px;
+}
+
+.patient-name-large {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 27px;
+    color: #000000;
+    text-align: center;
+    margin: 0;
+}
+
+.patient-info-card {
+    width: 332px;
+    height: 116px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.patient-info {
+    font-family: 'Cantarell';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 21px;
+    text-align: center;
+    color: #000000;
+}
+
+.cardio-header {
+    width: 100%;
+    height: 54px;
+    background: #08C3DC;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.cardio-header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.cardio-icon {
+    display: flex;
+    align-items: center;
+}
+
+.cardio-header-title {
+    font-family: 'Segoe UI';
+    font-style: normal;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 27px;
+    color: #FFFFFF;
+    margin: 0;
+}
+
