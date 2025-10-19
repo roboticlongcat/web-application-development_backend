@@ -58,8 +58,8 @@ func (r *Repository) GetInsulinCalculations(filters map[string]interface{}) ([]d
 	return insulinCalculations, nil
 }
 
-// GET одна запись (поля расчета + его пациенты)
-func (r *Repository) GetInsulinCalculationWithPatients(id uint) (ds.InsulinCalculation, []ds.Patient, error) {
+// GET одна запись (поля расчета + его пациенты с данными из м-м связи)
+func (r *Repository) GetInsulinCalculationWithPatients(id uint) (ds.InsulinCalculation, []map[string]interface{}, error) {
 	var insulinCalculation ds.InsulinCalculation
 	err := r.db.Preload("Creator", func(db *gorm.DB) *gorm.DB {
 		return db.Select("user_id, username")
@@ -72,13 +72,25 @@ func (r *Repository) GetInsulinCalculationWithPatients(id uint) (ds.InsulinCalcu
 	if err != nil {
 		return ds.InsulinCalculation{}, nil, err
 	}
-	// Получаем только пациентов через WHERE IN
-	var patients []ds.Patient
-	err = r.db.Where("patient_id IN (SELECT patient_id FROM insulin_calculation_patients WHERE insulin_calculation_id = ?)", id).
+
+	// Получаем пациентов с данными из связи many-to-many
+	var patients []map[string]interface{}
+	err = r.db.Table("insulin_calculation_patients").
+		Select(`
+            patients.name as name,
+            patients.sensitivity as sensitivity,
+            insulin_calculation_patients.current_glucose as current_glucose,
+            insulin_calculation_patients.bread_units as bread_units,
+            insulin_calculation_patients.calculated_insulin as calculated_insulin
+        `).
+		Joins("JOIN patients ON patients.patient_id = insulin_calculation_patients.patient_id").
+		Where("insulin_calculation_patients.insulin_calculation_id = ?", id).
 		Find(&patients).Error
+
 	if err != nil {
 		return ds.InsulinCalculation{}, nil, err
 	}
+
 	return insulinCalculation, patients, nil
 }
 
@@ -316,11 +328,6 @@ func (r *Repository) CalculateInsulin(currentGlucose, breadUnits float32, patien
 
 	// Общая доза инсулина с ограничениями
 	totalInsulin := correctionInsulin + foodInsulin
-
-	// Ограничиваем максимальное значение (например, 50 единиц)
-	//if totalInsulin > 50.0 {
-	//	totalInsulin = 900.0
-	//}
 
 	// Ограничиваем минимальное значение
 	if totalInsulin < 0 {
