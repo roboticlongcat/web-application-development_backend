@@ -39,10 +39,7 @@ func (h *Handler) GetPatients(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"patients": patients,
-		"count":    len(patients),
-	})
+	ctx.JSON(http.StatusOK, patients)
 }
 
 // GET /api/patients/:id - получение одного пациента
