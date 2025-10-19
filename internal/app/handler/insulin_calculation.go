@@ -59,10 +59,25 @@ func (h *Handler) GetInsulinCalculations(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"insulin_calculations": insulinCalculations,
-		"count":                len(insulinCalculations),
-	})
+	var response []gin.H
+	for _, calc := range insulinCalculations {
+		moderatorUsername := ""
+		if calc.Moderator.User_ID != 0 {
+			moderatorUsername = calc.Moderator.Username
+		}
+
+		response = append(response, gin.H{
+			"insulin_calculation_id": calc.Insulin_Calculation_ID,
+			"status":                 calc.Status,
+			"created_at":             calc.CreatedAt,
+			"calculated_at":          calc.CalculatedAt,
+			"completed_at":           calc.CompletedAt,
+			"creator_username":       calc.Creator.Username,
+			"moderator_username":     moderatorUsername,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 // GET /api/insulin-calculations/:id - получение расчета с пациентами
@@ -84,10 +99,28 @@ func (h *Handler) GetInsulinCalculationWithPatients(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"insulin_calculation": insulinCalculation,
-		"patients":            patients,
-	})
+	moderatorUsername := ""
+	if insulinCalculation.Moderator.User_ID != 0 {
+		moderatorUsername = insulinCalculation.Moderator.Username
+	}
+
+	// Создаем response без вложенности
+	response := gin.H{
+		"insulin_calculation": gin.H{
+			"insulin_calculation_id": insulinCalculation.Insulin_Calculation_ID,
+			"status":                 insulinCalculation.Status,
+			"created_at":             insulinCalculation.CreatedAt,
+			"calculated_at":          insulinCalculation.CalculatedAt,
+			"completed_at":           insulinCalculation.CompletedAt,
+			"creator_username":       insulinCalculation.Creator.Username,
+			"moderator_username":     moderatorUsername,
+			"comment":                insulinCalculation.Comment,
+		},
+		"patients":      patients,
+		"patient_count": len(patients),
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 // PUT /api/insulin-calculations/:id - обновление полей расчета
