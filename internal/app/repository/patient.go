@@ -144,7 +144,7 @@ func (r *Repository) AddPatientToInsulinCalculation(patientID uint, currentGluco
 			Updates(map[string]interface{}{
 				"current_glucose":    currentGlucose,
 				"bread_units":        breadUnits,
-				"calculated_insulin": r.CalculateInsulin(currentGlucose, breadUnits, patientID),
+				"calculated_insulin": 0,
 			}).Error
 	} else {
 		var maxLinkID uint
@@ -155,7 +155,7 @@ func (r *Repository) AddPatientToInsulinCalculation(patientID uint, currentGluco
 			Patient_ID:                     patientID,
 			CurrentGlucose:                 currentGlucose,
 			BreadUnits:                     breadUnits,
-			CalculatedInsulin:              r.CalculateInsulin(currentGlucose, breadUnits, patientID),
+			CalculatedInsulin:              0,
 		}
 		err = r.db.Create(&insulinCalculationPatient).Error
 	}
