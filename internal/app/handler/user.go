@@ -74,9 +74,7 @@ func (h *Handler) GetUserProfile(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"user": user,
-	})
+	ctx.JSON(http.StatusOK, user)
 }
 
 // PUT /api/users/:id/profile - обновление профиля пользователя
@@ -202,7 +200,5 @@ func (h *Handler) GetCurrentUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"user": user,
-	})
+	ctx.JSON(http.StatusOK, gin.H{"User_ID": user.User_ID, "Username": user.Username, "IsModerator": user.IsModerator})
 }
