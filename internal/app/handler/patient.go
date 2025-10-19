@@ -92,13 +92,13 @@ func (h *Handler) GetInsulinCalculation(ctx *gin.Context) {
 		return
 	}
 	if !isDraft {
-		ctx.Redirect(http.StatusSeeOther, ctx.Request.Referer())
+		ctx.Redirect(http.StatusSeeOther, "/")
 		return
 	}
 
 	insulincalculationPatients, err := h.Repository.GetInsulinCalculation(uint(id))
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		ctx.Redirect(http.StatusSeeOther, "/")
 		return
 	}
 
@@ -145,3 +145,4 @@ func (h *Handler) DeleteInsulinCalculation(ctx *gin.Context) {
 
 	ctx.Redirect(http.StatusFound, "/")
 }
+
