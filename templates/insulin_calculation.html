@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет пациентов</title>
+    <link rel="stylesheet" href="/static/styles/insulin_calculation_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cantarell:wght@400;700&family=Candal&family=Segoe+UI:wght@400;700;900&family=Roboto:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="cardio-header">
+        <div class="cardio-header-content">
+            <a href="/" class="cardio-icon">
+                <svg width="32" height="20" viewBox="0 0 32 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 10L4 10L6 6L8 14L10 10L12 10L14 4L16 16L18 10L20 10L22 8L24 12L26 10L28 10L30 2" 
+                          stroke="#FFFFFF" 
+                          stroke-width="2" 
+                          stroke-linecap="round" 
+                          stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <h1 class="cardio-header-title">К пациентам</h1>
+        </div>
+    </header>
+
+    <main class="main-patients-content">
+        <div class="calculation-actions">
+            <form method="POST" action="/insulin_calculation/delete">
+                <input type="hidden" name="insulin_calculation_id" value="{{.insulin_calculation_ID}}">
+                <button type="submit" class="delete-calculation-btn" 
+                        onclick="return confirm('Вы уверены, что хотите удалить этот расчет?')">
+                    🗑️ Удалить расчет
+                </button>
+            </form>
+        </div>
+        <div class="patients-cart-table">
+            <div class="patients-table-header">
+                <div class="patient-info-column-title">Пациент</div>
+                <div class="patient-info-column-title sensitivity-title">коэффициент чувствительности</div>
+                <div class="patient-info-column-title">количество ХЕ, ед</div>
+                <div class="patient-info-column-title glucose-title">уровень глюкозы в крови, ммоль/л</div>
+                <div class="patient-info-column-title">болюсный инсулин, ед</div>
+            </div>
+
+            {{range .patients}}
+            <div class="patient-row">
+                <div class="patient-info">
+                    <div class="patient-photo" style="background-image: url('http://localhost:9000/test/{{.Patient.Patient_ID}}.jpg');"></div>
+                    <div class="patient-name">{{.Patient.Name}}</div>
+                </div>
+                <div class="sensitivity-value">{{.Patient.Sensitivity}}</div>
+                <div class="measure-input-chip">
+                    <input type="number" class="measure-input-field" placeholder="0" min="0" step="0.1" value="5">
+                </div>
+                <div class="measure-input-chip">
+                    <input type="number" class="measure-input-field" placeholder="0" min="0" step="0.1" value="12">
+                </div>
+                <div class="measure-input-chip">
+                    <input type="number" class="measure-input-field" placeholder="0" min="0" step="0.1" value="6">
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </main>
+</body>
+</html>

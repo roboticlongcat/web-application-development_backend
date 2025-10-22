@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточка пациента</title>
+    <link rel="stylesheet" href="/static/styles/patient_detail_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Cantarell:wght@400;700&family=Candal&family=Segoe+UI:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="cardio-header">
+        <div class="cardio-header-content">
+            <a href="/" class="cardio-icon">
+                <svg width="32" height="20" viewBox="0 0 32 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 10L4 10L6 6L8 14L10 10L12 10L14 4L16 16L18 10L20 10L22 8L24 12L26 10L28 10L30 2" 
+                        stroke="#FFFFFF" 
+                        stroke-width="2" 
+                        stroke-linecap="round" 
+                        stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <h1 class="cardio-header-title">К пациентам</h1>
+        </div>
+    </header>
+
+    <main class="main-patient-content">
+        <!-- Заголовок информации -->
+        <div class="patient-info-title">Информация о пациенте:</div>
+
+        <!-- Контейнер для фото и информации -->
+        <div class="patient-content-container">
+            <!-- Контейнер для фото и имени -->
+            <div class="patient-photo-name-container">
+                <!-- Фото пациента -->
+                <div class="patient-photo" style="background-image: url('http://localhost:9000/test/{{.patient.Patient_ID}}.jpg');"></div>
+                
+                <!-- Имя пациента под фото -->
+                <h2 class="patient-name-large">{{.patient.Name}}</h2>
+            </div>
+
+            <!-- Белый прямоугольник с информацией -->
+            <div class="patient-info-card">
+                <div class="patient-info">
+                    Диабет {{.patient.Type}} типа<br>
+                    Коэффициент чувствительности: {{.patient.Sensitivity}}<br>
+                    Целевое значение глюкозы: {{.patient.Glucose}} ммоль/л
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

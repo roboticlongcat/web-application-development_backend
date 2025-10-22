@@ -1,0 +1,1043 @@
+basePath: /
+definitions:
+  serializer.AddToCalculationRequest:
+    properties:
+      bread_units:
+        type: number
+      current_glucose:
+        type: number
+    required:
+    - bread_units
+    - current_glucose
+    type: object
+  serializer.CompleteCalculationRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  serializer.InsulinCalculationCartInfoRespJSON:
+    properties:
+      insulin_calculation_id:
+        type: integer
+      patient_count:
+        type: integer
+    type: object
+  serializer.InsulinCalculationJSON:
+    properties:
+      calculated_at:
+        type: string
+      comment:
+        type: string
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      creator_id:
+        type: string
+      insulin_calculation_id:
+        type: integer
+      moderator_id:
+        type: string
+      status:
+        type: string
+    required:
+    - creator_id
+    - status
+    type: object
+  serializer.InsulinCalculationRespJSON:
+    properties:
+      calculated_at:
+        type: string
+      comment:
+        type: string
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      creator_username:
+        type: string
+      insulin_calculation_id:
+        type: integer
+      moderator_username:
+        type: string
+      status:
+        type: string
+    type: object
+  serializer.InsulinCalculationWithPatientsRespJSON:
+    properties:
+      insulin_calculation:
+        $ref: '#/definitions/serializer.InsulinCalculationRespJSON'
+      patient_count:
+        type: integer
+      patients:
+        items:
+          $ref: '#/definitions/serializer.PatientInCalculationRespJSON'
+        type: array
+    type: object
+  serializer.PatientInCalculationRespJSON:
+    properties:
+      bread_units:
+        type: number
+      calculated_insulin:
+        type: number
+      current_glucose:
+        type: number
+      name:
+        type: string
+      sensitivity:
+        type: number
+    type: object
+  serializer.PatientJSON:
+    properties:
+      description:
+        type: string
+      glucose:
+        type: number
+      name:
+        type: string
+      patient_id:
+        type: integer
+      photo_url:
+        type: string
+      sensitivity:
+        type: number
+      status:
+        type: string
+      type:
+        type: integer
+    required:
+    - glucose
+    - name
+    - sensitivity
+    - type
+    type: object
+  serializer.PatientRespJSON:
+    properties:
+      description:
+        type: string
+      glucose:
+        type: number
+      name:
+        type: string
+      patient_id:
+        type: integer
+      photo_url:
+        type: string
+      sensitivity:
+        type: number
+      status:
+        type: string
+      type:
+        type: integer
+    type: object
+  serializer.UpdatePatientInCalculationRequest:
+    properties:
+      bread_units:
+        type: number
+      current_glucose:
+        type: number
+    required:
+    - bread_units
+    - current_glucose
+    type: object
+  serializer.UserJSON:
+    properties:
+      is_moderator:
+        type: boolean
+      password:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  serializer.UserRespJSON:
+    properties:
+      is_moderator:
+        type: boolean
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  serializer.UserRespWithTokenJSON:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/serializer.UserRespJSON'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@insulin.ru
+    name: API Support
+  description: API для расчета болюсного инсулина
+  license:
+    name: AS IS (NO WARRANTY)
+  title: Insulin Calculation API
+  version: "1.0"
+paths:
+  /api/insulin-calculations:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список расчетов с фильтрацией по статусу и дате
+      parameters:
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      - description: Начальная дата фильтрации
+        in: query
+        name: start_date
+        type: string
+      - description: Конечная дата фильтрации
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список расчетов
+          schema:
+            items:
+              $ref: '#/definitions/serializer.InsulinCalculationRespJSON'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список расчетов инсулина
+      tags:
+      - insulin-calculations
+  /api/insulin-calculations/{insulin_calculation_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет расчет инсулина (только черновики)
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Расчет успешно удален
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный ID расчета
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить расчет
+      tags:
+      - insulin-calculations
+    get:
+      consumes:
+      - application/json
+      description: Возвращает полную информацию о расчете включая список пациентов
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные расчета с пациентами
+          schema:
+            $ref: '#/definitions/serializer.InsulinCalculationWithPatientsRespJSON'
+        "400":
+          description: Неверный ID расчета
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить расчет с пациентами
+      tags:
+      - insulin-calculations
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные расчета инсулина
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.InsulinCalculationJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Расчет успешно обновлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить данные расчета
+      tags:
+      - insulin-calculations
+  /api/insulin-calculations/{insulin_calculation_id}/complete:
+    put:
+      consumes:
+      - application/json
+      description: Завершает или отклоняет расчет модератором
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      - description: Статус завершения
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.CompleteCalculationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Расчет успешно завершен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Завершить или отклонить расчет
+      tags:
+      - insulin-calculations
+  /api/insulin-calculations/{insulin_calculation_id}/form:
+    put:
+      consumes:
+      - application/json
+      description: Переводит расчет из статуса черновика в сформированный
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Расчет успешно сформирован
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка формирования
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Сформировать расчет
+      tags:
+      - insulin-calculations
+  /api/insulin-calculations/{insulin_calculation_id}/patients/{patient_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет пациента из расчета инсулина
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пациент успешно удален из расчета
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверные ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет или пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить пациента из расчета инсулина
+      tags:
+      - insulin-calculations
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные пациента в расчете инсулина и пересчитывает инсулин
+      parameters:
+      - description: ID расчета инсулина
+        in: path
+        name: insulin_calculation_id
+        required: true
+        type: integer
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.UpdatePatientInCalculationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пациента в расчете успешно обновлены
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Расчет или пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить данные пациента в расчете инсулина
+      tags:
+      - insulin-calculations
+  /api/insulin-calculations/info:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о текущем черновике расчета (ID и количество
+        пациентов)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о корзине
+          schema:
+            $ref: '#/definitions/serializer.InsulinCalculationCartInfoRespJSON'
+        "404":
+          description: Черновик не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить информацию о корзине расчета
+      tags:
+      - insulin-calculations
+  /api/patients:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список пациентов с возможностью фильтрации
+      parameters:
+      - description: Фильтр по имени
+        in: query
+        name: name
+        type: string
+      - description: Фильтр по типу пациента (1,2,3)
+        in: query
+        name: type
+        type: string
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пациентов
+          schema:
+            items:
+              $ref: '#/definitions/serializer.PatientRespJSON'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список пациентов
+      tags:
+      - patients
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пациента в системе
+      parameters:
+      - description: Данные пациента
+        in: body
+        name: patient
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.PatientJSON'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пациент успешно создан
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создать нового пациента
+      tags:
+      - patients
+  /api/patients/{patient_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Помечает пациента как удаленного (мягкое удаление)
+      parameters:
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пациент успешно удален
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный ID пациента
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить пациента
+      tags:
+      - patients
+    get:
+      consumes:
+      - application/json
+      description: Возвращает данные конкретного пациента
+      parameters:
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пациента
+          schema:
+            $ref: '#/definitions/serializer.PatientRespJSON'
+        "400":
+          description: Неверный ID пациента
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить пациента по ID
+      tags:
+      - patients
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующего пациента
+      parameters:
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      - description: Новые данные пациента
+        in: body
+        name: patient
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.PatientJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пациент успешно обновлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить данные пациента
+      tags:
+      - patients
+  /api/patients/{patient_id}/add:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет пациента в заявку-черновик для расчета инсулина
+      parameters:
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      - description: Данные для расчета
+        in: body
+        name: calculation
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.AddToCalculationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пациент успешно добавлен в расчет
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить пациента в расчет инсулина
+      tags:
+      - patients
+  /api/patients/{patient_id}/photo:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает фотографию для пациента
+      parameters:
+      - description: ID пациента
+        in: path
+        name: patient_id
+        required: true
+        type: integer
+      - description: Фото пациента
+        in: formData
+        name: photo
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Фото успешно загружено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пациент не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Загрузить фото пациента
+      tags:
+      - patients
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Принимает логин/пароль, возвращает jwt-токен и данные пользователя.
+      parameters:
+      - description: Логин и пароль
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.UserJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ответ с токеном и пользователем
+          schema:
+            $ref: '#/definitions/serializer.UserRespWithTokenJSON'
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Вход (получение токена)
+      tags:
+      - users
+  /api/users/logout:
+    post:
+      description: Удаляет токен текущего пользователя из хранилища. Возвращает {"status":"signed_out"}.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: status
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Проблема с получением user_id
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка при удалении токена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Выход (удаление токена)
+      tags:
+      - users
+  /api/users/profile:
+    get:
+      description: Возвращает данные текущего аутентифицированного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя
+          schema:
+            $ref: '#/definitions/serializer.UserRespJSON'
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить текущего пользователя
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет профиль пользователя (может делать только сам пользователь).
+      parameters:
+      - description: Новые данные профиля
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.UserJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновлённый профиль
+          schema:
+            $ref: '#/definitions/serializer.UserRespJSON'
+        "400":
+          description: Ошибка запроса или авторизации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещён
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Изменить профиль пользователя
+      tags:
+      - users
+  /api/users/register:
+    post:
+      consumes:
+      - application/json
+      description: Регистрирует нового пользователя. Возвращает URL созданного ресурса
+        в Location и тело созданного пользователя.
+      parameters:
+      - description: Параметры нового пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.UserJSON'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь создан
+          schema:
+            $ref: '#/definitions/serializer.UserRespJSON'
+        "400":
+          description: Ошибка валидации или входных данных
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация пользователя
+      tags:
+      - users
+schemes:
+- https
+- http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
